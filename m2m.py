@@ -1,31 +1,24 @@
-input_file_path = 'deck.dek'
-output_file_path = 'cleaned_deck.txt'
+import csv
 
+input_csv = 'deck.csv'
+output_txt = 'deck_fixed.txt'
 
-def grab_card_info(text, start_delim, end_delim):
-    try:
-        start_index = text.index(start_delim) + len(start_delim)
-        end_index = text.index(end_delim, start_index)
-        return text[start_index:end_index]
-    except ValueError:
-        return ''
+columns = ['Quantity', 'Card Name', 'Set', 'Collector #']
 
+with open(input_csv, mode='r', newline='', encoding='utf-8') as csv_file:
+    reader = csv.DictReader(csv_file)
 
-new_deck = ''
+    with open(output_txt, mode='w', encoding='utf-8') as output_file:
+        for row in reader:
+            card_data = []
+            for col in columns:
+                columntext = row.get(col, '')
+                if col == 'Collector #':
+                    columntext = columntext.split('/')[0]
+                elif col == 'Set':
+                    columntext = f"({columntext})"
+                card_data.append(columntext)
 
-with open(input_file_path, 'r', encoding='utf-8') as file:
-    for line in file:
-        line = line.strip()
-        test = ""
-        qty = grab_card_info(line, 'Quantity="', '"')
-        name = grab_card_info(line, 'Name="', '"')
-        test += qty + " " + name
-        if test == " ":
-            test = "OOPS"
-        else:
-            new_deck += test + "\n"
+            output_file.write(' '.join(card_data) + '\n')
 
-with open(output_file_path, 'w', encoding='utf-8') as output_file:
-    output_file.write(new_deck)
-
-print(f"Cleaned deck exported to '{output_file_path}'.")
+print(f"Deck fixed and saved to {output_txt}")
